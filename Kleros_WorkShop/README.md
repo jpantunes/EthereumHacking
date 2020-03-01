@@ -1,0 +1,1 @@
+Kleros Smart contract hacking workshop. Maybe from EthCC Paris?

